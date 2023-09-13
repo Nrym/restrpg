@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using RestRpg.Data;
 using RestRpg.Models;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.Xml;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace RestRpg.Controllers
 {
@@ -9,36 +13,52 @@ namespace RestRpg.Controllers
     [ApiController]
     public class ItemController : ControllerBase
     {
-        private static List<Item> items = new List<Item>()
-        {
-            new Item() { Id = 0,Name="Item 0",Price=0.99},
-            new Item() { Id = 1,Name="Item 1",Price=1.99},
-            new Item() { Id = 2,Name="Item 2",Price=4.99},
-            new Item() { Id = 3,Name="Item 3",Price=9.99}
-        };
+        private ApiDbContext _apiDbContext;
 
+        public ItemController(ApiDbContext apiDbContext)
+        {
+            _apiDbContext = apiDbContext;
+        }
+
+        // GET: api/<ItemController>
         [HttpGet]
         public IEnumerable<Item> Get()
         {
-            return items;
+            return _apiDbContext.Items;
         }
 
+        // GET api/<ItemController>/5
+        [HttpGet("{id}")]
+        public Item Get(int id)
+        {
+            return _apiDbContext.Items.Find(id);
+        }
+
+        // POST api/<ItemController>
         [HttpPost]
         public void Post([FromBody] Item item)
         {
-            items.Add(item);
+            _apiDbContext.Items.Add(item);
+            _apiDbContext.SaveChanges();
         }
 
+        // PUT api/<ItemController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Item item)
+        public void Put(int id, [FromBody] Item newInfo)
         {
-            items[id] = item;
+            var item = _apiDbContext.Items.Find(id);
+            item.Name = newInfo.Name;
+            item.Price = newInfo.Price;
+            _apiDbContext.SaveChanges();
         }
 
+        // DELETE api/<ItemController>/5
         [HttpDelete("{id}")]
-        public void Put(int id)
+        public void Delete(int id)
         {
-            items.RemoveAt(id);
+            var item = _apiDbContext.Items.Find(id);
+            _apiDbContext.Items.Remove(item);
+            _apiDbContext.SaveChanges();
         }
     }
 }
