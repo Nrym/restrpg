@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using RestRpg.Data;
 using RestRpg.Models;
 using System.Collections.Generic;
@@ -29,36 +30,41 @@ namespace RestRpg.Controllers
 
         // GET api/<ItemController>/5
         [HttpGet("{id}")]
-        public Item Get(int id)
+        public IActionResult Get(int id)
         {
-            return _apiDbContext.Items.Find(id);
+            return Ok(_apiDbContext.Items.Find(id));
         }
 
         // POST api/<ItemController>
         [HttpPost]
-        public void Post([FromBody] Item item)
+        public IActionResult Post([FromBody] Item item)
         {
             _apiDbContext.Items.Add(item);
             _apiDbContext.SaveChanges();
+            return StatusCode(StatusCodes.Status201Created, "Item Created");
         }
 
         // PUT api/<ItemController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] Item newInfo)
+        public IActionResult Put(int id, [FromBody] Item newInfo)
         {
             var item = _apiDbContext.Items.Find(id);
+            if (item == null)
+                return NotFound("Item not found");
             item.Name = newInfo.Name;
             item.Price = newInfo.Price;
             _apiDbContext.SaveChanges();
+            return Ok("Item Updated");
         }
 
         // DELETE api/<ItemController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
             var item = _apiDbContext.Items.Find(id);
             _apiDbContext.Items.Remove(item);
             _apiDbContext.SaveChanges();
+            return Ok("Item Deleted");
         }
     }
 }
