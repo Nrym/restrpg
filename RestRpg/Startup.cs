@@ -29,6 +29,7 @@ namespace RestRpg
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddMvc().AddXmlDataContractSerializerFormatters();
 
             services.AddSwaggerGen();
             services.AddSwaggerGen(c =>
@@ -40,19 +41,23 @@ namespace RestRpg
                     Description = "A simple example to Implement Swagger UI",
                 });
             });
-            services.AddDbContext<ApiDbContext>(option => option.UseSqlServer(@"Data Source=PE-IT001720\SQLEXPRESS2;Initial Catalog=RestRpgDb;User id=sa;Password=sql;"));
+            var machine = System.Environment.MachineName;
+            if(machine== "NEX-PRO")
+                services.AddDbContext<ApiDbContext>(option => option.UseSqlServer(@"Data Source=NEX-PRO\SQLEXPRESS;Initial Catalog=RestRpgDb;User id=sa;Password=sql;"));
+            else
+                services.AddDbContext<ApiDbContext>(option => option.UseSqlServer(@"Data Source=PE-IT001720\SQLEXPRESS2;Initial Catalog=RestRpgDb;User id=sa;Password=sql;"));
         }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApiDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)//, ApiDbContext dbContext
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            dbContext.Database.EnsureCreated();
+            //dbContext.Database.EnsureCreated();
 
             app.UseHttpsRedirection();
 
